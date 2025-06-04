@@ -1,0 +1,39 @@
+# REF: ChatGPT conversation 22/5 16:50 to include opencv lib
+CC       = gcc
+CFLAGS   = -Wall -Wextra -pedantic -std=gnu99 \
+           -I/local/courses/csse2310/include
+
+# existing CSSE2310 libs
+CSSE2310_LIB_DIR = /local/courses/csse2310/lib
+CSSE2310_LIBS    = -lcsse2310a4
+
+# add OpenCV lib path + libs
+OPENCV_LIB_DIR = /usr/lib64
+OPENCV_LIBS    = -lopencv_core \
+                 -lopencv_imgcodecs \
+                 -lopencv_objdetect \
+                 -lopencv_imgproc
+
+# combine all linker flags
+LDFLAGS = -L$(CSSE2310_LIB_DIR) $(CSSE2310_LIBS) \
+          -L$(OPENCV_LIB_DIR) $(OPENCV_LIBS)
+
+.PHONY: all clean
+.DEFAULT_GOAL := all
+
+all: uqfaceclient uqfacedetect
+
+# link client (no pthread)
+uqfaceclient: uqfaceclient.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# link server (with pthread)
+uqfacedetect: uqfacedetect.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -pthread
+
+# compile rules
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f uqfaceclient uqfacedetect *.o
